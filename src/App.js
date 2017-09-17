@@ -13,13 +13,35 @@ class BooksApp extends React.Component {
      * pages, as well as provide a good URL they can bookmark and share.
      */
     showSearchPage: false
-  }
+  };
 
   componentDidMount() {
     BooksAPI.getAll().then(books => {
-      console.log(books)
-      this.setState({ books })
-    })
+      this.setState({ books });
+    });
+  }
+
+  /**
+  * @description Updates book shelf using API and updates the state
+  * @param {Object} book - The book to update
+  * @param {string} shelf - The new shelf for a book
+  */
+  updateBookShelf = (book, shelf) => {
+    BooksAPI.update(book, shelf).then(shelves => {
+      // invert shelves to have an assignment from book id to shelf
+      const bookShelves = [];
+      for (const [shelf, bookIds] of Object.entries(shelves)) {
+        for (const bookId of bookIds) {
+          bookShelves[bookId] = shelf;
+        }
+      }
+      this.setState(state => ({
+        books: state.books.map(book => {
+          book.shelf = bookShelves[book.id] || 'none';
+          return book;
+        })
+      }));
+    });
   }
 
   render() {
@@ -55,15 +77,18 @@ class BooksApp extends React.Component {
               <div>
                 <BookShelf 
                   title={'Currently Reading'} 
-                  books={this.state.books.filter(book => book.shelf === 'currentlyReading')} 
+                  books={this.state.books.filter(book => book.shelf === 'currentlyReading')}
+                  onUpdateBookShelf={this.updateBookShelf} 
                 />
                 <BookShelf 
                   title={'Want to Read'} 
                   books={this.state.books.filter(book => book.shelf === 'wantToRead')} 
+                  onUpdateBookShelf={this.updateBookShelf} 
                 />
                 <BookShelf 
                   title={'Read'} 
                   books={this.state.books.filter(book => book.shelf === 'read')} 
+                  onUpdateBookShelf={this.updateBookShelf} 
                 />
               </div>
             </div>

@@ -4,7 +4,12 @@ import PropTypes from 'prop-types'
 class BookShelf extends Component {
   static propTypes = {
     title: PropTypes.string.isRequired,
-    books: PropTypes.array.isRequired
+    books: PropTypes.array.isRequired,
+    onUpdateBookShelf: PropTypes.func.isRequired
+  }
+
+  handleShelfChange(book, event) {
+    this.props.onUpdateBookShelf(book, event.target.value)
   }
 
   render() {
@@ -15,7 +20,7 @@ class BookShelf extends Component {
         <div className="bookshelf-books">
           <ol className="books-grid">
             {books.map(book => (
-              // TODO: Create a Book.js
+              // TODO: Create a Book.js??
               <li key={book.id}>
                 <div className="book">
                   <div className="book-top">
@@ -26,8 +31,7 @@ class BookShelf extends Component {
                       backgroundImage: `url(${book.imageLinks.thumbnail})`
                     }}></div>
                     <div className="book-shelf-changer">
-                      <select>
-                        // TODO: Select initially proper value
+                      <select value={book.shelf} onChange={(event) => this.handleShelfChange(book, event)}>
                         <option value="none" disabled>Move to...</option>
                         <option value="currentlyReading">Currently Reading</option>
                         <option value="wantToRead">Want to Read</option>
