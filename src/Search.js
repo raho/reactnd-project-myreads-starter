@@ -3,40 +3,53 @@ import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import * as BooksAPI from './BooksAPI';
 import Book from './Book';
+import {debounce} from './Utils';
 
 class Search extends Component {
   static propTypes = {
     books: PropTypes.array.isRequired,
     onUpdateBookShelf: PropTypes.func.isRequired
-  }
+  };
 
   state = {
     query: '',
     foundBooks: []
+  };
+
+  constructor(props) {
+    super(props);
+    this.debouncedSearchBooks = debounce(this.searchBooks, 250);
   }
 
   updateQuery = (query) => {
-    // TODO: timing!! (one after another)
     const trimmedQuery = query.trim();
     this.setState({
       query: trimmedQuery 
     })
-    if (trimmedQuery) {
-      BooksAPI.search(trimmedQuery, 100).then(foundBooks => {
+    this.debouncedSearchBooks(trimmedQuery);
+  };
+
+  searchBooks = (query) => {
+    if (query) {
+      BooksAPI.search(query, 20).then(foundBooks => {
         // apply shelf info from props.books
-        foundBooks = foundBooks.map(foundBook => {
-          const userBook = this.props.books.find(b => b.id === foundBook.id);
-          if (userBook) {
-            foundBook.shelf = userBook.shelf;
-          }
-          return foundBook;
-        });
-        this.setState({foundBooks});
+        if (foundBooks.error) {
+          this.setState({foundBooks: []})
+        } else {
+          foundBooks = foundBooks.map(foundBook => {
+            const userBook = this.props.books.find(b => b.id === foundBook.id);
+            if (userBook) {
+              foundBook.shelf = userBook.shelf;
+            }
+            return foundBook;
+          });
+          this.setState({foundBooks});
+        }
       })
     } else {
       this.setState({foundBooks: []})
-    }
-  }
+    } 
+  };
 
   render() {
     return (
