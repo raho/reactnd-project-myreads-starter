@@ -1,10 +1,9 @@
 import React from 'react';
-import {Link, Route} from 'react-router-dom';
+import {Route} from 'react-router-dom';
 import * as BooksAPI from './BooksAPI';
 import './App.css';
-import BookShelf from './BookShelf';
+import BookList from './BookList';
 import Search from './Search';
-import sortBy from 'sort-by';
 
 class BooksApp extends React.Component {
   state = {
@@ -48,33 +47,10 @@ class BooksApp extends React.Component {
     return (
       <div className="app">
         <Route exact path="/" render={() => (
-          <div className="list-books">
-            <div className="list-books-title">
-              <h1>MyReads</h1>
-            </div>
-            <div className="list-books-content">
-              <div>
-                <BookShelf 
-                  title={'Currently Reading'} 
-                  books={books.filter(book => book.shelf === 'currentlyReading').sort(sortBy('title'))}
-                  onUpdateBookShelf={this.updateBookShelf} 
-                />
-                <BookShelf 
-                  title={'Want to Read'} 
-                  books={books.filter(book => book.shelf === 'wantToRead').sort(sortBy('title'))} 
-                  onUpdateBookShelf={this.updateBookShelf} 
-                />
-                <BookShelf 
-                  title={'Read'} 
-                  books={books.filter(book => book.shelf === 'read').sort(sortBy('title'))} 
-                  onUpdateBookShelf={this.updateBookShelf} 
-                />
-              </div>
-            </div>
-            <div className="open-search">
-              <Link to="/search">Add a book</Link>
-            </div>
-          </div>
+          <BookList 
+            books={books}
+            onUpdateBookShelf={this.updateBookShelf} 
+          />
         )}/>
         <Route path="/search" render={() => (
           <Search 
